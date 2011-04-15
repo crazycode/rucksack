@@ -31,7 +31,9 @@ class AlbumPicture < ActiveRecord::Base
 
   has_many :application_logs, :as => :rel_object, :dependent => :nullify
   
-  has_attached_file :picture, :styles => { :album => "150x150#" }
+  has_attached_file :picture, :styles => { :album => "150x150#" },
+			      :url => '/pages/:page_id/albums/:album_id/pictures/:id/:style.:extension',
+			      :path => ':rails_root/assets/:class/:id_partition/:style/:basename.:extension'
   
   belongs_to :created_by, :class_name => 'User', :foreign_key => 'created_by_id'
   belongs_to :updated_by, :class_name => 'User', :foreign_key => 'updated_by_id'

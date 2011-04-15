@@ -33,7 +33,11 @@ Currently there is no demo available. However since rucksack takes mere minutes 
 
 ## Sounds great, how do i install it?
 
-Firstly, make a "config/database.yml" file based off of 
+As rucksack uses the excellent Paperclip plugin, you will
+want to make sure that you have ImageMagick installed
+before proceeding.
+
+Then, make a "config/database.yml" file based off of 
 "config/database.example.yml". If you want a quick start, 
 you can use the file as-is since it is already set up to 
 use a local SQLite database.

@@ -103,8 +103,14 @@ Rucksack::Application.routes.draw do
         post :reorder
         put :transfer
       end
-      resources :pictures, :controller => 'album_pictures', :as => :album_pictures
+      resources :pictures, :controller => 'album_pictures', :as => :album_pictures do
+        member do
+          get :original
+          get :album
+        end
+      end
     end
+
   end
 
   # You can have the root of your site routed with map.root -- just remember to delete public/index.html.

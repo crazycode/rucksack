@@ -147,7 +147,33 @@ class AlbumPicturesController < ApplicationController
     end
   end
 
+  # GET /album_pictures/1/picture/1/album.jpg
+  def album
+    logger.debug 'rendering album pic'
+    @album_picture = @album.pictures.find(params[:id])
+    send_file @album_picture.picture.path, 
+	      :type => @album_picture.picture.content_type,
+	      :disposition => 'inline'
+  end
+
+  # GET /album_pictures/1/picture/1/orginal.jpg
+  def original
+    @album_picture = @album.pictures.find(params[:id])
+    send_file @album_picture.picture.path, 
+	      :type => @album_picture.picture.content_type,
+	      :disposition => 'inline'
+  end
+
 protected
+
+  def authorized?(action = action_name, resource = nil)
+    @page = Page.find(params[:page_id])
+    if @page.is_public
+      public_auth
+    else
+      logged_in?
+    end
+  end
 
   def grab_album
     begin
