@@ -4,7 +4,7 @@ require 'paperclip/version'
 include_files = ["README*", "LICENSE", "Rakefile", "init.rb", "{lib,tasks,test,rails,generators,shoulda_macros}/**/*"].map do |glob|
   Dir[glob]
 end.flatten
-exclude_files = ["test/s3.yml", "test/debug.log", "test/paperclip.db", "test/doc", "test/doc/*", "test/pkg", "test/pkg/*", "test/tmp", "test/tmp/*"].map do |glob|
+exclude_files = ["**/*.rbc", "test/s3.yml", "test/debug.log", "test/paperclip.db", "test/doc", "test/doc/*", "test/pkg", "test/pkg/*", "test/tmp", "test/tmp/*"].map do |glob|
   Dir[glob]
 end.flatten
 
@@ -25,9 +25,10 @@ spec = Gem::Specification.new do |s|
   s.extra_rdoc_files  = Dir["README*"]
   s.rdoc_options << '--line-numbers' << '--inline-source'
   s.requirements << "ImageMagick"
-  s.add_dependency 'activerecord'
-  s.add_dependency 'activesupport'
+  s.add_dependency 'activerecord', '>=2.3.0'
+  s.add_dependency 'activesupport', '>=2.3.2'
   s.add_development_dependency 'shoulda'
+  s.add_development_dependency 'appraisal'
   s.add_development_dependency 'mocha'
   s.add_development_dependency 'aws-s3'
   s.add_development_dependency 'sqlite3-ruby'

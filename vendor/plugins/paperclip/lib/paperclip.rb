@@ -26,6 +26,7 @@
 # See the +has_attached_file+ documentation for more details.
 
 require 'erb'
+require 'digest'
 require 'tempfile'
 require 'paperclip/version'
 require 'paperclip/upfile'
@@ -33,11 +34,12 @@ require 'paperclip/iostream'
 require 'paperclip/geometry'
 require 'paperclip/processor'
 require 'paperclip/thumbnail'
-require 'paperclip/storage'
 require 'paperclip/interpolations'
 require 'paperclip/style'
 require 'paperclip/attachment'
+require 'paperclip/storage'
 require 'paperclip/callback_compatability'
+require 'paperclip/command_line'
 require 'paperclip/railtie'
 if defined?(Rails.root) && Rails.root
   Dir.glob(File.join(File.expand_path(Rails.root), "lib", "paperclip_processors", "*.rb")).each do |processor|
@@ -74,14 +76,6 @@ module Paperclip
       yield(self) if block_given?
     end
 
-    def path_for_command command #:nodoc:
-      if options[:image_magick_path]
-        warn("[DEPRECATION] :image_magick_path is deprecated and will be removed. Use :command_path instead")
-      end
-      path = [options[:command_path] || options[:image_magick_path], command].compact
-      File.join(*path)
-    end
-
     def interpolates key, &block
       Paperclip::Interpolations[key] = block
     end
@@ -103,48 +97,11 @@ module Paperclip
     # Paperclip.options[:log_command] is set to true (defaults to false). This
     # will only log if logging in general is set to true as well.
     def run cmd, *params
-      options           = params.last.is_a?(Hash) ? params.pop : {}
-      expected_outcodes = options[:expected_outcodes] || [0]
-      params            = quote_command_options(*params).join(" ")
-
-      command = %Q[#{path_for_command(cmd)} #{params}]
-      command = "#{command} 2>#{bit_bucket}" if Paperclip.options[:swallow_stderr]
-      Paperclip.log(command) if Paperclip.options[:log_command]
-
-      begin
-        output = `#{command}`
-
-        raise CommandNotFoundError if $?.exitstatus == 127
-
-        unless expected_outcodes.include?($?.exitstatus)
-          raise PaperclipCommandLineError,
-            "Error while running #{cmd}. Expected return code to be #{expected_outcodes.join(", ")} but was #{$?.exitstatus}",
-            output
-        end
-      rescue Errno::ENOENT => e
-        raise CommandNotFoundError
+      if options[:image_magick_path]
+        Paperclip.log("[DEPRECATION] :image_magick_path is deprecated and will be removed. Use :command_path instead")
       end
-
-      output
-    end
-
-    def quote_command_options(*options)
-      options.map do |option|
-        option.split("'").map{|m| "'#{m}'" }.join("\\'")
-      end
-    end
-
-    def bit_bucket #:nodoc:
-      File.exists?("/dev/null") ? "/dev/null" : "NUL"
-    end
-
-    def included base #:nodoc:
-      base.extend ClassMethods
-      if base.respond_to?("set_callback")
-        base.send :include, Paperclip::CallbackCompatability::Rails3
-      else
-        base.send :include, Paperclip::CallbackCompatability::Rails21
-      end
+      CommandLine.path = options[:command_path] || options[:image_magick_path]
+      CommandLine.new(cmd, *params).run
     end
 
     def processor name #:nodoc:
@@ -154,6 +111,12 @@ module Paperclip
         raise PaperclipError.new("Processor #{name} was not found")
       end
       processor
+    end
+
+    def each_instance_with_attachment(klass, name)
+      Object.const_get(klass).all.each do |instance|
+        yield(instance) if instance.send(:"#{name}?")
+      end
     end
 
     # Log a paperclip-specific line. Uses ActiveRecord::Base.logger
@@ -182,6 +145,9 @@ module Paperclip
     end
   end
 
+  class StorageMethodNotFound < PaperclipError
+  end
+
   class CommandNotFoundError < PaperclipError
   end
 
@@ -189,6 +155,17 @@ module Paperclip
   end
 
   class InfiniteInterpolationError < PaperclipError #:nodoc:
+  end
+
+  module Glue
+    def self.included base #:nodoc:
+      base.extend ClassMethods
+      if base.respond_to?("set_callback")
+        base.send :include, Paperclip::CallbackCompatability::Rails3
+      else
+        base.send :include, Paperclip::CallbackCompatability::Rails21
+      end
+    end
   end
 
   module ClassMethods
@@ -299,6 +276,7 @@ module Paperclip
       max     = options[:less_than]    || (options[:in] && options[:in].last)  || (1.0/0)
       range   = (min..max)
       message = options[:message] || "file size must be between :min and :max bytes."
+      message = message.call if message.respond_to?(:call)
       message = message.gsub(/:min/, min.to_s).gsub(/:max/, max.to_s)
 
       validates_inclusion_of :"#{name}_file_size",
@@ -350,9 +328,10 @@ module Paperclip
       validation_options = options.dup
       allowed_types = [validation_options[:content_type]].flatten
       validates_each(:"#{name}_content_type", validation_options) do |record, attr, value|
-        if !allowed_types.any?{|t| t === value } && value.present?
+        if !allowed_types.any?{|t| t === value } && !(value.nil? || value.blank?)
           if record.errors.method(:add).arity == -2
             message = options[:message] || "is not one of #{allowed_types.join(", ")}"
+            message = message.call if message.respond_to?(:call)
             record.errors.add(:"#{name}_content_type", message)
           else
             record.errors.add(:"#{name}_content_type", :inclusion, :default => options[:message], :value => value)

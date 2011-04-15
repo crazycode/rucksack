@@ -1,115 +1,62 @@
-require 'test/helper'
+require './test/helper'
 
 class PaperclipTest < Test::Unit::TestCase
-  [:image_magick_path, :command_path].each do |path|
-    context "Calling Paperclip.run with #{path} specified" do
-      setup do
-        Paperclip.options[:image_magick_path] = nil
-        Paperclip.options[:command_path]      = nil
-        Paperclip.options[path]               = "/usr/bin"
-      end
-
-      should "return the expected path for path_for_command" do
-        assert_equal "/usr/bin/convert", Paperclip.path_for_command("convert")
-      end
-
-      should "execute the right command" do
-        Paperclip.expects(:path_for_command).with("convert").returns("/usr/bin/convert")
-        Paperclip.expects(:bit_bucket).returns("/dev/null")
-        Paperclip.expects(:"`").with("/usr/bin/convert 'one.jpg' 'two.jpg' 2>/dev/null")
-        Paperclip.run("convert", "one.jpg", "two.jpg")
-      end
-    end
-  end
-
-  context "Calling Paperclip.run with no path specified" do
+  context "Calling Paperclip.run" do
     setup do
       Paperclip.options[:image_magick_path] = nil
       Paperclip.options[:command_path]      = nil
+      Paperclip::CommandLine.stubs(:'`')
     end
 
-    should "return the expected path fro path_for_command" do
-      assert_equal "convert", Paperclip.path_for_command("convert")
+    should "execute the right command with :image_magick_path" do
+      Paperclip.options[:image_magick_path] = "/usr/bin"
+      Paperclip.expects(:log).with(includes('[DEPRECATION]'))
+      Paperclip.expects(:log).with(regexp_matches(%r{/usr/bin/convert ['"]one.jpg['"] ['"]two.jpg['"]}))
+      Paperclip::CommandLine.expects(:"`").with(regexp_matches(%r{/usr/bin/convert ['"]one.jpg['"] ['"]two.jpg['"]}))
+      Paperclip.run("convert", ":one :two", :one => "one.jpg", :two => "two.jpg")
     end
 
-    should "execute the right command" do
-      Paperclip.expects(:path_for_command).with("convert").returns("convert")
-      Paperclip.expects(:bit_bucket).returns("/dev/null")
-      Paperclip.expects(:"`").with("convert 'one.jpg' 'two.jpg' 2>/dev/null")
-      Paperclip.run("convert", "one.jpg", "two.jpg")
-    end
-  end
-
-  context "Calling Paperclip.run and logging" do
-    should "log the command when :log_command is true" do
-      Paperclip.options[:image_magick_path] = nil
-      Paperclip.options[:command_path]      = nil
-      Paperclip.stubs(:bit_bucket).returns("/dev/null")
-      Paperclip.expects(:log).with("this 'is the command' 2>/dev/null")
-      Paperclip.expects(:"`").with("this 'is the command' 2>/dev/null")
-      Paperclip.options[:log_command] = true
-      Paperclip.run("this","is the command")
+    should "execute the right command with :command_path" do
+      Paperclip.options[:command_path] = "/usr/bin"
+      Paperclip::CommandLine.expects(:"`").with(regexp_matches(%r{/usr/bin/convert ['"]one.jpg['"] ['"]two.jpg['"]}))
+      Paperclip.run("convert", ":one :two", :one => "one.jpg", :two => "two.jpg")
     end
 
-    should "not log the command when :log_command is false" do
-      Paperclip.options[:image_magick_path] = nil
-      Paperclip.options[:command_path]      = nil
-      Paperclip.stubs(:bit_bucket).returns("/dev/null")
-      Paperclip.expects(:log).with("this 'is the command' 2>/dev/null").never
-      Paperclip.expects(:"`").with("this 'is the command' 2>/dev/null")
-      Paperclip.options[:log_command] = false
-      Paperclip.run("this","is the command")
+    should "execute the right command with no path" do
+      Paperclip::CommandLine.expects(:"`").with(regexp_matches(%r{convert ['"]one.jpg['"] ['"]two.jpg['"]}))
+      Paperclip.run("convert", ":one :two", :one => "one.jpg", :two => "two.jpg")
     end
-  end
 
-  context "Calling Paperclip.run when the command is not found" do
     should "tell you the command isn't there if the shell returns 127" do
-      begin
+      with_exitstatus_returning(127) do
         assert_raises(Paperclip::CommandNotFoundError) do
-          `ruby -e 'exit 127'` # Stub $?.exitstatus to be 127, i.e. Command Not Found.
-          Paperclip.stubs(:"`").returns("")
           Paperclip.run("command")
         end
-      ensure
-        `ruby -e 'exit 0'` # Unstub $?.exitstatus
       end
     end
+
     should "tell you the command isn't there if an ENOENT is raised" do
       assert_raises(Paperclip::CommandNotFoundError) do
-        Paperclip.stubs(:"`").raises(Errno::ENOENT)
+        Paperclip::CommandLine.stubs(:"`").raises(Errno::ENOENT)
         Paperclip.run("command")
       end
     end
   end
 
-  should "prevent dangerous characters in the command via quoting" do
-    Paperclip.options[:image_magick_path] = nil
-    Paperclip.options[:command_path]      = nil
-    Paperclip.options[:log_command]       = false
-    Paperclip.options[:swallow_stderr]    = false
-    Paperclip.expects(:"`").with(%q[this 'is' 'jack'\''s' '`command`' 'line!'])
-    Paperclip.run("this", "is", "jack's", "`command`", "line!")
-  end
-
-  context "Paperclip.bit_bucket" do
-    context "on systems without /dev/null" do
-      setup do
-        File.expects(:exists?).with("/dev/null").returns(false)
-      end
-
-      should "return 'NUL'" do
-        assert_equal "NUL", Paperclip.bit_bucket
-      end
+  context "Paperclip.each_instance_with_attachment" do
+    setup do
+      @file = File.new(File.join(FIXTURES_DIR, "5k.png"), 'rb')
+      d1 = Dummy.create(:avatar => @file)
+      d2 = Dummy.create
+      d3 = Dummy.create(:avatar => @file)
+      @expected = [d1, d3]
     end
-
-    context "on systems with /dev/null" do
-      setup do
-        File.expects(:exists?).with("/dev/null").returns(true)
+    should "yield every instance of a model that has an attachment" do
+      actual = []
+      Paperclip.each_instance_with_attachment("Dummy", "avatar") do |instance|
+        actual << instance
       end
-
-      should "return '/dev/null'" do
-        assert_equal "/dev/null", Paperclip.bit_bucket
-      end
+      assert_same_elements @expected, actual
     end
   end
 
@@ -242,6 +189,12 @@ class PaperclipTest < Test::Unit::TestCase
       end
     end
 
+    should "not have Attachment in the ActiveRecord::Base namespace" do
+      assert_raises(NameError) do
+        ActiveRecord::Base::Attachment
+      end
+    end
+
     def self.should_validate validation, options, valid_file, invalid_file
       context "with #{validation} validation and #{options.inspect} options" do
         setup do
@@ -299,6 +252,21 @@ class PaperclipTest < Test::Unit::TestCase
       should_validate validation, options, valid_file, invalid_file
     end
 
+    context "with content_type validation and lambda message" do
+      context "and assigned an invalid file" do
+        setup do
+          Dummy.send(:"validates_attachment_content_type", :avatar, :content_type => %r{image/.*}, :message => lambda {'lambda content type message'})
+          @dummy = Dummy.new
+          @dummy.avatar &&= File.open(File.join(FIXTURES_DIR, "text.txt"), "rb")
+          @dummy.valid?
+        end
+
+        should "have a content type error message" do
+          assert [@dummy.errors[:avatar_content_type]].flatten.any?{|error| error =~ %r/lambda content type message/ }
+        end
+      end
+    end
+
     context "with size validation and less_than 10240 option" do
       context "and assigned an invalid file" do
         setup do
@@ -310,6 +278,21 @@ class PaperclipTest < Test::Unit::TestCase
 
         should "have a file size min/max error message" do
           assert [@dummy.errors[:avatar_file_size]].flatten.any?{|error| error =~ %r/between 0 and 10240 bytes/ }
+        end
+      end
+    end
+
+    context "with size validation and less_than 10240 option with lambda message" do
+      context "and assigned an invalid file" do
+        setup do
+          Dummy.send(:"validates_attachment_size", :avatar, :less_than => 10240, :message => lambda {'lambda between 0 and 10240 bytes'})
+          @dummy = Dummy.new
+          @dummy.avatar &&= File.open(File.join(FIXTURES_DIR, "12k.png"), "rb")
+          @dummy.valid?
+        end
+
+        should "have a file size min/max error message" do
+          assert [@dummy.errors[:avatar_file_size]].flatten.any?{|error| error =~ %r/lambda between 0 and 10240 bytes/ }
         end
       end
     end
