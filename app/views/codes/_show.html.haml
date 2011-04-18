@@ -1,0 +1,12 @@
+- empty_code = !(object.title? or object.content?)
+- hover_handle = "page_slot_handle_#{page_slot.id}"
+.pageCode
+  - if object.title?
+    %h2{:hover_handle => hover_handle}
+      - if object.title?
+        = h object.title
+  - if empty_code
+    .pageCodeContent{'hover_handle' => hover_handle}= t('empty_code')
+  - else
+    .pageCodeContent{'hover_handle' => hover_handle}
+      %pre&= object.content

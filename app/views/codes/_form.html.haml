@@ -1,0 +1,27 @@
+- if @code.nil? or @code.new_record?
+  - fpath = page_codes_path(@page)
+  - fmethod = :post
+  - fid = 'fixedWidgetForm'
+- else
+  - fpath = page_code_path(@page, @code)
+  - fmethod = :put
+  - fid = 'widgetForm'
+  
+= form_tag( fpath, :method => fmethod, :class => fid) do
+  - if @code.nil? or @code.new_record?
+    %h2= t('add_code')
+  
+  %div
+    != text_field 'code', 'title', :id => 'codeFormTitle', :class => 'autofocus long'
+  %div
+    %label{:for => 'codeFormTitle'}
+    != text_area 'code', 'content', :id => 'codeFormContent', :rows => 8, :class => 'long'
+  
+  - if @code.nil? or @code.new_record?
+    %input#add_CodeFormBefore{:type => 'hidden', :name=> 'position[before]', :value => '0'}/
+    %input#add_CodeFormSlot{:type => 'hidden', :name=> 'position[slot]', :value => '0'}/
+    %button{:class => 'submit', :type => 'submit'}= t('add_code')
+  - else
+    %button{:class => 'submit', :type => 'submit'}= t('edit_code')
+  
+  %a{:href => '#', :class => 'cancel'}= t('cancel')

@@ -909,6 +909,23 @@ var Page = {
         return false;
       });
 
+      $('.add_Code').click(function(evt) {
+        // Set to top of page if on top toolbar
+        if ($(this).hasClass('atTop'))
+          InsertionMarker.set(null, true);
+        
+        var form = $('#add_CodeForm');
+  
+        InsertionBar.setWidgetForm(form);
+        InsertionBar.hide();
+        InsertionMarker.setEnabled(true);
+        HoverHandle.setEnabled(true);
+        
+        form.autofocus();
+  
+        return false;
+      });
+
       $('.add_Separator').click(function(evt) {
         // Set to top of page if on top toolbar
         if ($(this).hasClass('atTop'))

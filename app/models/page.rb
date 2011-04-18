@@ -38,6 +38,7 @@ class Page < ActiveRecord::Base
   
   has_many :lists, :dependent => :destroy
   has_many :notes, :dependent => :destroy
+  has_many :codes, :dependent => :destroy
   has_many :separators, :dependent => :destroy
   has_many :emails, :dependent => :destroy
   has_many :uploaded_files, :dependent => :destroy
@@ -100,7 +101,7 @@ class Page < ActiveRecord::Base
   end
   
   def self.widgets
-     [List, Note, Separator, UploadedFile, Album]
+     [List, Note, Code, Separator, UploadedFile, Album]
   end
    
   def process_params

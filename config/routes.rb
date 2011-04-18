@@ -90,6 +90,7 @@ Rucksack::Application.routes.draw do
     end
     
     resources :notes
+    resources :codes
     resources :separators
     resources :emails do
       member do

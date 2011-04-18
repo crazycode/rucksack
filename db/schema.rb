@@ -1,15 +1,16 @@
-# This file is auto-generated from the current state of the database. Instead of editing this file, 
-# please use the migrations feature of Active Record to incrementally modify your database, and
-# then regenerate this schema definition.
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
 #
-# Note that this schema.rb definition is the authoritative source for your database schema. If you need
-# to create the application database on another system, you should be using db:schema:load, not running
-# all the migrations from scratch. The latter is a flawed and unsustainable approach (the more migrations
+# Note that this schema.rb definition is the authoritative source for your
+# database schema. If you need to create the application database on another
+# system, you should be using db:schema:load, not running all the migrations
+# from scratch. The latter is a flawed and unsustainable approach (the more migrations
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 22) do
+ActiveRecord::Schema.define(:version => 20110418123155) do
 
   create_table "accounts", :force => true do |t|
     t.integer  "owner_id",       :limit => 10,                    :null => false
@@ -63,6 +64,16 @@ ActiveRecord::Schema.define(:version => 22) do
 
   add_index "application_logs", ["modified_page_id", "created_by_id"], :name => "index_application_logs_on_modified_page_id_and_created_by_id"
   add_index "application_logs", ["rel_object_id", "rel_object_type"], :name => "index_application_logs_on_rel_object_id_and_rel_object_type"
+
+  create_table "codes", :force => true do |t|
+    t.integer  "page_id"
+    t.string   "title"
+    t.text     "content"
+    t.integer  "created_by_id"
+    t.integer  "updated_by_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "emails", :force => true do |t|
     t.integer  "page_id",       :limit => 10
