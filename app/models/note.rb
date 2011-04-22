@@ -35,6 +35,11 @@ class Note < ActiveRecord::Base
   
   has_many :tags, :as => :rel_object, :dependent => :destroy
 
+  searchable do
+    text :title
+    text :content
+  end
+
   after_create   :process_create
   before_update  :process_update_params
   before_destroy :process_destroy

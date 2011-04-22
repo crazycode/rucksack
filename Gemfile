@@ -10,6 +10,8 @@ gem 'haml'
 gem 'ruby-openid'
 gem 'gravtastic'
 
+gem 'sunspot_rails'
+
 group :development do
 end
 

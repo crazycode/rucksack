@@ -41,6 +41,7 @@ en:
   overview: Overview
   users: Users
   my_profile: My Profile
+  search: Search
   
   # Page view
   add_to_page: Add to page
@@ -303,3 +304,6 @@ en:
     
   product_name: Rucksack
   product_signature: Powered by Rucksack
+
+  # Search
+  search_header: Search will match on complete words only, and lists only pages to which you have access

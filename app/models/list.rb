@@ -38,6 +38,10 @@ class List < ActiveRecord::Base
   
   has_many :list_items, :order => 'position ASC, completed_on ASC', :dependent => :destroy
   
+  searchable do
+    text :name
+  end
+
   #before_create  :process_params
   after_create   :process_create
   before_update  :process_update_params

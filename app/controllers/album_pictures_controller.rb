@@ -149,9 +149,8 @@ class AlbumPicturesController < ApplicationController
 
   # GET /album_pictures/1/picture/1/album.jpg
   def album
-    logger.debug 'rendering album pic'
     @album_picture = @album.pictures.find(params[:id])
-    send_file @album_picture.picture.path, 
+    send_file @album_picture.picture.path('album'), 
 	      :type => @album_picture.picture.content_type,
 	      :disposition => 'inline'
   end

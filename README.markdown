@@ -13,6 +13,7 @@ any of the following content (or "widgets"):
 * Separators (or you can call them headings)
 * Files
 * Images
+* Code snippets
 
 These pages can be edited by yourself and any other 
 user you choose to share it to. 
@@ -36,6 +37,12 @@ Currently there is no demo available. However since rucksack takes mere minutes 
 As rucksack uses the excellent Paperclip plugin, you will
 want to make sure that you have ImageMagick installed
 before proceeding.
+
+Rucksack uses <a href="http://outoftime.github.com/sunspot/">Sunspot</a>
+to provide search functionality - you will want to initialise the database
+when you install / upgrade by running the command:
+
+    rake sunspot:solr:start
 
 Then, make a "config/database.yml" file based off of 
 "config/database.example.yml". If you want a quick start, 
@@ -62,5 +69,9 @@ Finally, login. The default credentials are:
 The most likely explanation is that the database schema has been updated. You'll need to type in the following command to resolve this:
 
     rake db:migrate
+
+You will also need to make sure that Sunspot has scanned any existing data so that you can seach on it, by typing in the following command:
+
+    rake sunspot:reindex
 
 Have fun!

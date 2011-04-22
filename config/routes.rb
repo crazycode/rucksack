@@ -32,6 +32,8 @@ Rucksack::Application.routes.draw do
       put :snooze
     end
   end
+
+  resource :search
   
   resource :status
   resources :journals

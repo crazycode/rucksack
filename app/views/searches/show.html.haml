@@ -1,0 +1,25 @@
+- @page_title = t('search')
+- @tabbed_navigation_items = common_tabs(:search)
+- @user_navigation_items = user_tabs(nil) if logged_in?
+
+%p= t(:search_header)
+
+= form_tag( '/search', :method => 'post', :class => 'searchForm') do
+  %div
+    %input{:type => 'text', :id => 'query', :name => 'query', :class => 'autofocus moderate', :value => params[:query]}
+    /!= text_field 'search', 'keywords', :class => 'autofocus moderate'
+    %button{:class => 'submit', :type => 'submit'}= t('search')
+
+- if @results
+  .results
+    %h2 'Results'
+    - @results.each do |page, title|
+      .result
+        - if logged_in?
+          %a.usrPageLink{:href => page_path(page)}
+            %span= page.title
+        - else
+          %a.usrPageLink{:href => public_page_url(page)}
+            %span= page.title
+        %p= title
+

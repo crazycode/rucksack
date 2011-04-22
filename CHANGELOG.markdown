@@ -1,13 +1,14 @@
 CHANGELOG
 =========
 
-in progress - v0.1.2
---------------------
+2011/04/22 - v0.1.2
+-------------------
 
 Initial pass of improvements:
 
   * album pictures now share the same protection as the pages they are on
   * added a new code widget, to allow the addition of code snippets
+  * added search page, using Solr/Sunspot
 
 
 2011/04/15 - v0.1.1

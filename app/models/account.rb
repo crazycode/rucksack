@@ -35,7 +35,7 @@ class Account < ActiveRecord::Base
 
     attr_accessible :site_name, :host_name, :openid_enabled
 
-    Tabs = ['overview', 'pages', 'reminders', 'journal']
+    Tabs = ['overview', 'pages', 'reminders', 'journal', 'search']
 
     Tabs.each do |tab|
         define_method("#{tab}_hidden?") do

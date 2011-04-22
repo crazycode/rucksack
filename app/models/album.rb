@@ -35,6 +35,10 @@ class Album < ActiveRecord::Base
   belongs_to :created_by, :class_name => 'User', :foreign_key => 'created_by_id'
   belongs_to :updated_by, :class_name => 'User', :foreign_key => 'updated_by_id'
 
+  searchable do
+    text :title
+  end
+
   after_create   :process_create
   before_update  :process_update_params
   before_destroy :process_destroy

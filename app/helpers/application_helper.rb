@@ -132,7 +132,8 @@ module ApplicationHelper
     items = [{:id => :overview, :url => '/dashboard'},
              {:id => :pages, :url => '/pages/current'},
              {:id => :reminders, :url => '/reminders'},
-             {:id => :journal, :url => '/journals'}]
+             {:id => :journal, :url => '/journals'},
+             {:id => :search, :url => '/search'}]
     
     @selected_navigation_item = current
     return items
