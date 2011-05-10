@@ -13,4 +13,11 @@
       %a.newPage{:href => new_page_url}="+ #{t('new_page')}"
 
 .sidebarBlock
+  = form_tag( '/search', :method => 'post', :class => 'searchForm') do
+    %div
+      %input{:type => 'text', :id => 'query', :name => 'query', :class => 'autofocus short', :value => params[:query]}
+      %button{:class => 'submit', :type => 'submit'}= t('search')
+ 
+
+.sidebarBlock
   != render :partial => 'listed_pages'

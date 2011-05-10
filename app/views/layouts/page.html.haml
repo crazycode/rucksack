@@ -29,7 +29,7 @@
       %meta{ :name => 'auth-token', :content => form_authenticity_token }
     = javascript_tag yield(:js_templates)
     
-    %style{:type => 'text/css'}= ".totalPageWidth { width: #{@page.width+200}px; }\n#content { width: #{@page.width}px; }"
+    %style{:type => 'text/css'}= ".totalPageWidth { width: #{@page.width+240}px; }\n#content { width: #{@page.width}px; }"
     
     %style{:type => 'text/css'}= "#tabsWrapper ul li a { color: #{site_account.tab_text_colour}; background: #{site_account.tab_background_colour}; }"
     %style{:type => 'text/css'}= "#tabsWrapper ul li a:hover { color: #{site_account.tab_text_hover_colour}; background: #{site_account.tab_background_hover_colour}; }"

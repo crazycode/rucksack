@@ -18,7 +18,9 @@
     
     - if protect_against_forgery?
       %meta{ :name => 'auth-token', :content => form_authenticity_token }
-    
+
+    %style{:type => 'text/css'}= ".totalPageWidth { width: #{400+240}px; }\n#content { width: #{400}px; }"
+
     %style{:type => 'text/css'}= "#tabsWrapper ul li a { color: #{site_account.tab_text_colour}; background: #{site_account.tab_background_colour}; }"
     %style{:type => 'text/css'}= "#tabsWrapper ul li a:hover { color: #{site_account.tab_text_hover_colour}; background: #{site_account.tab_background_hover_colour}; }"
     %style{:type => 'text/css'}= "#header { background: #{site_account.header_colour}; }"
