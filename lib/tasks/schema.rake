@@ -10,6 +10,7 @@ namespace :db do
 			Rake::Task["db:rucksack:install_content"].invoke
 		end
 
+ 		desc 'install content'
 		task :install_content => :environment do
 			puts "\nLoading initial content..."
 			load("db/default_content.rb")

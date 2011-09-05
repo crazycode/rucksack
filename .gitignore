@@ -9,3 +9,6 @@ public/pictures/**
 db/*.sqlite3
 index/**
 .DS_Store
+
+Gemfile.lock
+config/initializers/session_store.rb

@@ -2,6 +2,7 @@ source :rubygems
 
 gem 'rails', '~> 3.0.0', :require => nil
 gem 'sqlite3-ruby', :require => 'sqlite3'
+gem 'mysql2'
 
 gem 'gravtastic'
 gem 'chronic'
